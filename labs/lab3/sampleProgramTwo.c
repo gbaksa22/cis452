@@ -23,16 +23,18 @@ int main()
     }
     int output = 3;
     int input;
+    char myStringOutput[] = "This a test!";
+    char myStringInput[50];
 
     if (pid == 0)
     { // Child process
-        write(fd[1], &output, sizeof(int));
-        printf("Child wrote [%d]\n", output);
+        write(fd[1], &myStringOutput, (sizeof(char)*13));
+        printf("Child wrote [%s]\n", myStringOutput);
     }
     else
     {
-        read(fd[0], &input, sizeof(int));
-        printf("Parent received [%d] from child process\n", input);
+        read(fd[0], &myStringInput, (sizeof(char)*13));
+        printf("Parent received [%s] from child process\n", myStringInput);
     }
 
     return 0;
