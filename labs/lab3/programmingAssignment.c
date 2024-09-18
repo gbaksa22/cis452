@@ -5,6 +5,8 @@
 void sigHandler(int);
 int main()
 {
+    // create pipe between child and parent
+
     int pid = fork();
 
     if (pid < 0) // Fork failed
@@ -15,29 +17,24 @@ int main()
 
     if (pid == 0)
     { // Child process
-        printf("Child\n");
+        // wait between 1 and 5 seconds
+        // send one of two user signals to parent
+        return 0;
     }
     else
     { // Parent process
         printf("Spawned child PID# %d\n", pid);
         signal(SIGUSR1, sigHandler);
         signal(SIGUSR2, sigHandler);
-        signal(SIGINT, sigintHandler);
+        signal(SIGINT, sigHandler);
         printf("waiting...");
         pause();
         return 0;
     }    
 }
 
-// handles user signals from child process
 void sigHandler(int sigNum)
 {
-    printf(" received a %s signal\n", sigNum)
-}
-
-// handles ^C interrupt
-void sigintHandler(int sigNum)
-{
-    printf(" received. Shutting down...\n");
-    exit(0);
+    // differentiate between user signals and SIGINT
+    printf(" received a %d signal\n", sigNum);
 }
