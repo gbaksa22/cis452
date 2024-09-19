@@ -20,8 +20,8 @@ int main() {
         char* fileArg = malloc(strlen(fileName) + 1); 
         strcpy(fileArg, fileName);
 
-        pthread_create(&worker, NULL, workerThread, fileArg);
         totalRequests++;
+        pthread_create(&worker, NULL, workerThread, fileArg);
     }
     /* 
     • Input a string from the user (simulating the name of a file to access) 
@@ -36,8 +36,17 @@ int main() {
 
 void* workerThread(void* arg) {
     char* fileName = (char*) arg;
-    printf("Worker started for file: %s\n", fileName);
-    printf("Request count: %d\n", totalRequests);
+    printf("\nWorker started for file: %s\n", fileName);
+
+    srand(time(NULL));
+    int randomValue = rand() % 10;
+    if (randomValue < 8) {
+        sleep(1);  // Fast access
+    } else {
+        sleep(rand() % 4 + 7);  // Slow access (7-10 seconds)
+    }
+
+    printf("\nRequest count: %d\n", totalRequests);
     free(fileName);
     char *result = "Success";
     pthread_exit(result);
