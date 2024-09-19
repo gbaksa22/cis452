@@ -5,6 +5,8 @@
 #include <string.h>
 #include <time.h>
 
+int totalRequests = 0;
+
 int main() {
     /* 
     • Input a string from the user (simulating the name of a file to access) 
@@ -34,10 +36,12 @@ void *workerThread(void *arg) {
 }
 
 void handleExit(int signum) {
+    printf("\nReceived Ctrl + C. Total file requests: %d\n", totalRequests);
+    exit(0);
     /*
     Your program should continue to execute until terminated by the user (^C).  At 
     that point, your program should print out basic statistics: 
-    • Total number of file requests received 
+        • Total number of file requests received 
     When terminated, your program should cleanup as appropriate (i.e., free 
     resources) and shutdown gracefully. If there are any executing ‘file requests’ 
     those should complete before the program exits.
