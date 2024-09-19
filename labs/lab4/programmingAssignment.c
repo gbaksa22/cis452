@@ -5,9 +5,12 @@
 #include <string.h>
 #include <time.h>
 
+void* workerThread(void *arg);
 int totalRequests = 0;
 
 int main() {
+    
+    pthread_t worker;
     char fileName[100];
 
     printf("Enter filenames (Ctrl + C to exit):\n");
@@ -16,8 +19,9 @@ int main() {
         scanf("%s", fileName);
         char* fileArg = malloc(strlen(fileName) + 1); 
         strcpy(fileArg, fileName);
-        printf("testing input: %s\n", fileArg);
-        free(fileArg);
+
+        pthread_create(&worker, NULL, workerThread, fileArg);
+        totalRequests++;
     }
     /* 
     • Input a string from the user (simulating the name of a file to access) 
@@ -27,24 +31,31 @@ int main() {
     request) 
     • Ensure your dispatcher is capable of properly handling rapidly entered 
     filenames (i.e., the user rapidly entering the filenames in succession)*/
+    return 0;
 }
 
-// void *workerThread(void *arg) {
-//     /*
-//     • Obtain the simulated filename from the dispatcher 
-//     • Sleep for a certain amount of time, simulating the time spent performing a 
-//     file access: 
-//         o with 80% probability, sleep for 1 second.  This simulates the 
-//         scenario that the Worker thread has found the desired file in the 
-//         disk cache and serves it up quickly. 
-//         o with 20% probability, sleep for 7-10 seconds (randomly).  This 
-//         simulates the scenario that the worker thread has not found the 
-//         requested file in the disk cache and must block while it is read in 
-//         from the hard drive. 
-//     • Wake up, print a diagnostic message that includes the name of the file 
-//     accessed, then terminate
-//     */
-// }
+void* workerThread(void* arg) {
+    char* fileName = (char*) arg;
+    printf("Worker started for file: %s\n", fileName);
+    free(fileName);
+    printf("Request count: %d", totalRequests);
+    char *result = "Success";
+    pthread_exit(result);
+    /*
+    • Obtain the simulated filename from the dispatcher 
+    • Sleep for a certain amount of time, simulating the time spent performing a 
+    file access: 
+        o with 80% probability, sleep for 1 second.  This simulates the 
+        scenario that the Worker thread has found the desired file in the 
+        disk cache and serves it up quickly. 
+        o with 20% probability, sleep for 7-10 seconds (randomly).  This 
+        simulates the scenario that the worker thread has not found the 
+        requested file in the disk cache and must block while it is read in 
+        from the hard drive. 
+    • Wake up, print a diagnostic message that includes the name of the file 
+    accessed, then terminate
+    */
+}
 
 void handleExit(int signum) {
     printf("\nReceived Ctrl + C. Total file requests: %d\n", totalRequests);
