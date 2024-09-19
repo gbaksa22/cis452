@@ -4,12 +4,14 @@
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
+#include <signal.h>
 
 void* workerThread(void *arg);
+void handleExit(int signum);
 int totalRequests = 0;
 
 int main() {
-    
+    signal(SIGINT, handleExit);
     pthread_t worker;
     char fileName[100];
 
@@ -45,7 +47,7 @@ void* workerThread(void* arg) {
     } else {
         sleep(rand() % 4 + 7);  // Slow access (7-10 seconds)
     }
-
+    printf("\n%s just woke up!\n", fileName);
     printf("\nRequest count: %d\n", totalRequests);
     free(fileName);
     char *result = "Success";
