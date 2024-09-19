@@ -8,6 +8,17 @@
 int totalRequests = 0;
 
 int main() {
+    char fileName[100];
+
+    printf("Enter filenames (Ctrl + C to exit):\n");
+    
+    while (1) {
+        scanf("%s", fileName);
+        char* fileArg = malloc(strlen(fileName) + 1); 
+        strcpy(fileArg, fileName);
+        printf("testing input: %s\n", fileArg);
+        free(fileArg);
+    }
     /* 
     • Input a string from the user (simulating the name of a file to access) 
     • Spawn a child thread and communicate to it the filename 
@@ -18,22 +29,22 @@ int main() {
     filenames (i.e., the user rapidly entering the filenames in succession)*/
 }
 
-void *workerThread(void *arg) {
-    /*
-    • Obtain the simulated filename from the dispatcher 
-    • Sleep for a certain amount of time, simulating the time spent performing a 
-    file access: 
-        o with 80% probability, sleep for 1 second.  This simulates the 
-        scenario that the Worker thread has found the desired file in the 
-        disk cache and serves it up quickly. 
-        o with 20% probability, sleep for 7-10 seconds (randomly).  This 
-        simulates the scenario that the worker thread has not found the 
-        requested file in the disk cache and must block while it is read in 
-        from the hard drive. 
-    • Wake up, print a diagnostic message that includes the name of the file 
-    accessed, then terminate
-    */
-}
+// void *workerThread(void *arg) {
+//     /*
+//     • Obtain the simulated filename from the dispatcher 
+//     • Sleep for a certain amount of time, simulating the time spent performing a 
+//     file access: 
+//         o with 80% probability, sleep for 1 second.  This simulates the 
+//         scenario that the Worker thread has found the desired file in the 
+//         disk cache and serves it up quickly. 
+//         o with 20% probability, sleep for 7-10 seconds (randomly).  This 
+//         simulates the scenario that the worker thread has not found the 
+//         requested file in the disk cache and must block while it is read in 
+//         from the hard drive. 
+//     • Wake up, print a diagnostic message that includes the name of the file 
+//     accessed, then terminate
+//     */
+// }
 
 void handleExit(int signum) {
     printf("\nReceived Ctrl + C. Total file requests: %d\n", totalRequests);
