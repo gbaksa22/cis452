@@ -37,8 +37,8 @@ int main() {
 void* workerThread(void* arg) {
     char* fileName = (char*) arg;
     printf("Worker started for file: %s\n", fileName);
+    printf("Request count: %d\n", totalRequests);
     free(fileName);
-    printf("Request count: %d", totalRequests);
     char *result = "Success";
     pthread_exit(result);
     /*
