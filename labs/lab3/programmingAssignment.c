@@ -18,7 +18,7 @@ void signal_handler(int sigNum)
     signal(SIGUSR2, signal_handler);
 }
 
-void sigint_handler(int sig) {
+void sigint_handler(int sigNum) {
     printf(" received.  That's it, I'm shutting you down...\n");
     fflush(stdout);  // Flush the output buffer - asked ChatGPT because of issues with ^C formatting
     exit(0);
