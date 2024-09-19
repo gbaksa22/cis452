@@ -28,13 +28,17 @@ int main()
 
     if (pid == 0)
     { // Child process
-        write(fd[1], &myStringOutput, (sizeof(char)*13));
+        close(fd[READ]);
+        write(fd[WRITE], &myStringOutput, (sizeof(char)*13));
         printf("Child wrote [%s]\n", myStringOutput);
+        close(fd[WRITE]);
     }
     else
     {
-        read(fd[0], &myStringInput, (sizeof(char)*13));
+        close(fd[WRITE]);
+        read(fd[READ], &myStringInput, (sizeof(char)*13));
         printf("Parent received [%s] from child process\n", myStringInput);
+        close(fd[READ]);
     }
 
     return 0;
