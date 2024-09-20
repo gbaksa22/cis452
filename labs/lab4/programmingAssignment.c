@@ -9,6 +9,7 @@
 void* workerThread(void *arg);
 void handleExit(int signum);
 int totalRequests = 0;
+int openThreads = 0;
 
 int main() {
     signal(SIGINT, handleExit);
@@ -23,6 +24,8 @@ int main() {
         strcpy(fileArg, fileName);
 
         totalRequests++;
+        openThreads++;
+        
         pthread_create(&worker, NULL, workerThread, fileArg);
     }
     return 0;
@@ -41,11 +44,15 @@ void* workerThread(void* arg) {
     }
     printf("\n%s just woke up!\n", fileName);
     free(fileName);
-    char *result = "Success";
-    pthread_exit(result);
+    openThreads--;
+    pthread_exit(NULL); //ChatGPT suggested using pthread_exit with NULL return value
 }
 
 void handleExit(int signum) {
+    while (openThreads > 0) {
+        printf("\nWaiting for %d threads to finish...\n", openThreads);
+        sleep(1);
+    }
     printf("\nReceived Ctrl + C. Total file requests: %d\n", totalRequests);
     exit(0);
 }
