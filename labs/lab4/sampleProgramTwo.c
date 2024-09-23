@@ -41,8 +41,8 @@ int main()
     printf("Thread two returned: [%s]\n", (char *)result2);
     return 0;
 }
-// function called by the threads, will print out a different message based on the argument
-passed to it void *doGreeting(void *myArgument)
+// function called by the threads, will print out a different message based on the argument passed to it
+void *doGreeting(void *myArgument)
 {
     printf("String passed = %s\n", (char *)myArgument);
     threadCounter = threadCounter + 1;
@@ -50,6 +50,7 @@ passed to it void *doGreeting(void *myArgument)
     // Print out a message based on the argument passed to us
     for (int loop = 0; loop < 10; loop++)
     {
+        sleep(1);
         if (strcmp((char *)myArgument, "hi") == 0)
         {
             printf("Hello\n");

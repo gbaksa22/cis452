@@ -26,7 +26,7 @@ int main()
         fprintf(stderr, "thread create error %d: %s\n", threadStatus2, strerror(threadStatus2));
         exit(1);
     }
-    printf("Parent sees %d\n", sharedData);
+    printf("Line 29 parent sees %d\n", sharedData);
     sharedData++;
     joinStatus1 = pthread_join(thread1, &result1);
     if (joinStatus1 != 0)
@@ -40,7 +40,7 @@ int main()
         fprintf(stderr, "Join error %d: %s\n", joinStatus2, strerror(joinStatus2));
         exit(1);
     }
-    printf("Parent sees %d\n", sharedData);
+    printf("Line 43 parent sees %d\n", sharedData);
     return 0;
 }
 void *doGreeting(void *myArgument)
