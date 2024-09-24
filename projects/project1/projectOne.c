@@ -51,15 +51,20 @@ int main () {
 
     // logic for parent process
 
-    getchar(); // clears buffer
+    getchar(); // clear buffer
     // prompt the user for a string message 
     // should be able to handle messages of more than one word
     char message[256];
-    printf("Enter a message: "); 
+    printf("Enter a message: \n"); 
     scanf("%[^\n]", message);
-    printf("%s", message);
+    printf("%s\n", message);
 
     // prompt the user for the number of the node to send the message to
+    getchar(); // clear buffer
+    int targetNode;
+    printf("Enter a node to send the message to: \n"); 
+    scanf("%d", &targetNode);
+    printf("%d\n", targetNode);
 
     // send the message and node number to the first child node
     return 0;
