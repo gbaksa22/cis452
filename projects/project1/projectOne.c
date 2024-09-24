@@ -10,6 +10,11 @@
 int k;
 int apple = 0;
 
+typedef struct {
+    int targetNode;
+    char message[256];
+} Message;
+
 void sigint_handler(int sigNum) {
     printf(" received.  Gracefully exiting...\n");
     exit(0);
