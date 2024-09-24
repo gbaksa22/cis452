@@ -28,7 +28,10 @@ void node(int id, int read_fd, int write_fd) {
 
         if (id == receivedMessage.targetNode) {
             printf("[Target Node %d] has the apple and recieved the message: \"%s\"\n", id, receivedMessage.message);
-            strcpy(receivedMessage.message, "");
+            strcpy(receivedMessage.message, "empty");
+        } else if (strcmp(receivedMessage.message, "empty") == 0) {
+            printf("[Node %d] has the apple and is passing an empty message\n", id);
+            
         } else {
             printf("[Node %d] has the apple and is passing on this message: \"%s\" for target node %d\n", id, receivedMessage.message, receivedMessage.targetNode);
         }
@@ -48,7 +51,6 @@ int main () {
     int pipeCreationResult;
     for (int i = 0; i < k; i++) {
         pipeCreationResult = pipe(pipes[i]);
-        // check for proper creation
         if (pipeCreationResult < 0)
         {
             perror("Failed pipe creation\n");
@@ -60,7 +62,6 @@ int main () {
     int pid;
     for (int i = 0; i < k; i++) {
         pid = fork();
-        // check for proper creation
         if (pid < 0)
         {
             perror("Fork failed\n");
@@ -72,7 +73,6 @@ int main () {
             int read_fd = pipes[i][READ];
             int write_fd = pipes[(i + 1) % k][WRITE];
             node(i, read_fd, write_fd);
-            exit(0); // placeholder
         }
     }
 
@@ -90,6 +90,6 @@ int main () {
     write(pipes[0][WRITE], &messageToSend, sizeof(messageToSend));
 
     read(pipes[k - 1][READ], &messageToSend, sizeof(messageToSend));
-    printf("[First Node] has the apple. The apple has passed through the ring.\n");
+    printf("[Node 0] has the apple again. The apple has passed through the ring.\n");
     return 0;
 }
