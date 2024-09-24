@@ -75,23 +75,20 @@ int main () {
         }
     }
 
-    // logic for node 0
-
-    getchar(); // clear buffer
-    // prompt the user for a string message 
-    // should be able to handle messages of more than one word
+    // Node 0
+    Message messageToSend;
+    getchar(); 
     printf("Enter a message: \n"); 
     fgets(messageToSend.message, sizeof(messageToSend.message), stdin);
+    messageToSend.message[strcspn(messageToSend.message, "\n")] = 0; //ChatGPT helped remove newline char
 
-    // prompt the user for the number of the node to send the message to
     printf("Enter a node to send the message to: \n"); 
     scanf("%d", &messageToSend.targetNode);
-    getchar(); // clear buffer
-
-    // send the message and node number to the first child node
+    getchar();
 
     write(pipes[0][WRITE], &messageToSend, sizeof(messageToSend));
 
-    printf("[Parent] Message sent. Waiting for the next message...\n");
+    read(pipes[k - 1][READ], &messageToSend, sizeof(messageToSend));
+    printf("[First Node] has the apple. The apple has passed through the ring.\n");
     return 0;
 }
