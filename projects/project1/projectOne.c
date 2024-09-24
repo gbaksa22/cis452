@@ -4,6 +4,9 @@
 #include <signal.h>
 #include <errno.h>
 
+#define READ 0
+#define WRITE 1
+
 int k;
 int apple = 0;
 
@@ -19,10 +22,10 @@ int main () {
     scanf("%d", &k);
 
     // create pipe for communication
-    int fd[k][2];
+    int pipes[k][2];
     int pipeCreationResult;
     for (int i = 0; i < k; i++) {
-        pipeCreationResult = pipe(fd[i]);
+        pipeCreationResult = pipe(pipes[i]);
         // check for proper creation
         if (pipeCreationResult < 0)
         {
@@ -44,7 +47,9 @@ int main () {
         if (pid == 0) 
         {
             printf("[%d] - Node %d created\n", getpid(), i);
-
+            int read_fd = pipes[i][READ];
+            int write_fd = pipes[(i + 1) % k][WRITE];
+            node(i, read_fd, write_fd);
             exit(0); // placeholder
         }
     }
