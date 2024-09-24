@@ -26,12 +26,12 @@ void node(int id, int read_fd, int write_fd) {
         read(read_fd, &receivedMessage, sizeof(receivedMessage));
 
         if (id == receivedMessage.targetNode) {
-            printf("[Target Node %d] has recieved the message: \"%s\"\n", id, receivedMessage.message);
+            printf("[Target Node %d] has the apple and recieved the message: \"%s\"\n", id, receivedMessage.message);
             strcpy(receivedMessage.message, "");
         } else {
-            printf("[Node %d] is passing on message: \"%s\" for target node %d\n", id, receivedMessage.message, receivedMessage.targetNode);
+            printf("[Node %d] has the apple and is passing on this message: \"%s\" for target node %d\n", id, receivedMessage.message, receivedMessage.targetNode);
         }
-        
+
         write(write_fd, &receivedMessage, sizeof(receivedMessage));
     }
 }
