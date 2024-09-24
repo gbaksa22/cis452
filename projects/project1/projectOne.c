@@ -20,6 +20,14 @@ void sigint_handler(int sigNum) {
     exit(0);
 }
 
+void node(int id, int read_fd, int write_fd) {
+    Message receivedMessage;
+    while (1) {
+        read(read_fd, &receivedMessage, sizeof(receivedMessage));
+        write(write_fd, &receivedMessage, sizeof(receivedMessage));
+    }
+}
+
 int main () {
     signal(SIGINT, sigint_handler);
 
