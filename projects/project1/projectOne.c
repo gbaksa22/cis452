@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <signal.h>
 #include <errno.h>
 
 int k;
@@ -19,11 +20,11 @@ int main () {
     scanf("%d", &k);
 
     // create pipe for communication
-    int fd = [k][2];
+    int fd[k][2];
     int pipeCreationResult;
-    // check for proper creation
     for (int i = 0; i < k; i++) {
         pipeCreationResult = pipe(fd[i]);
+        // check for proper creation
         if (pipeCreationResult < 0)
         {
             perror("Failed pipe creation\n");
@@ -32,6 +33,16 @@ int main () {
     }
 
     // create k child nodes
+    int pid;
+    for (int i = 0; i < k; i++) {
+        pid = fork();
+        // check for proper creation
+        if (pid < 0)
+        {
+            perror("Fork failed\n");
+            exit(1);
+        }
+    }
     // check for proper creation
 
     // if else for parent and children ?
