@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <errno.h>
+#include <string.h>
 
 #define READ 0
 #define WRITE 1
