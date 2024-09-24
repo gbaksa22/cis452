@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <signal.h>
 #include <errno.h>
 
@@ -42,13 +41,20 @@ int main () {
             perror("Fork failed\n");
             exit(1);
         }
-    }
-    // check for proper creation
+        if (pid == 0) 
+        {
+            printf("[%d] - Node %d created\n", getpid(), i);
 
-    // if else for parent and children ?
+            exit(0); // placeholder
+        }
+    }
+
+    // logic for parent process
 
     // prompt the user for a string message 
     // should be able to handle messages of more than one word
 
     // prompt the user for the number of the node to send the message to
+
+    // send the message and node number to the first child node
 }
