@@ -60,9 +60,9 @@ int main () {
         }
     }
 
-    // create k child nodes
+    // change number of nodes being created
     int pid;
-    for (int i = 0; i < k; i++) {
+    for (int i = 1; i < k; i++) {
         pid = fork();
         if (pid < 0)
         {
@@ -72,6 +72,7 @@ int main () {
         if (pid == 0) 
         {
             printf("[%d] - Node %d created\n", getpid(), i);
+            // change read write pipes
             int read_fd = pipes[i][READ];
             int write_fd = pipes[(i + 1) % k][WRITE];
             node(i, read_fd, write_fd);
@@ -91,7 +92,8 @@ int main () {
             scanf("%d", &messageToSend.targetNode);
             getchar();
 
-            write(pipes[0][WRITE], &messageToSend, sizeof(messageToSend));
+            // print out parent node has the apple
+            write(pipes[1][WRITE], &messageToSend, sizeof(messageToSend));
 
             read(pipes[k - 1][READ], &messageToSend, sizeof(messageToSend));
             printf("[Node 0] has the apple again. The apple has passed through the ring.\n");
