@@ -51,7 +51,7 @@ void node(int id, int read_fd, int write_fd) {
 }
 
 int main () {
-
+    signal(SIGUSR1, node_creation_handler);
     printf("Enter the number of nodes (k): "); 
     scanf("%d", &k);
 
