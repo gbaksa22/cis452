@@ -51,8 +51,6 @@ void node(int id, int read_fd, int write_fd) {
 }
 
 int main () {
-    signal(SIGINT, sigint_handler);
-    signal(SIGUSR1, node_creation_handler);
 
     printf("Enter the number of nodes (k): "); 
     scanf("%d", &k);
@@ -93,6 +91,8 @@ int main () {
     }
 
     // Node 0
+    signal(SIGINT, sigint_handler);
+    
     Message messageToSend;
     Message finalReceivedMessage;
     int write_fd = pipes[1][WRITE];
