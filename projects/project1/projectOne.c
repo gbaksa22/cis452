@@ -18,20 +18,20 @@ typedef struct {
     char message[256];
 } Message;
 
-void node_creation_handler(int sig) {
+void nodeCreationHandler(int sig) { //ChatGPT helped figure out how to get "Enter a message:" to print after node creation
     nodesCreated++;
 }
 
-void sigint_handler(int sigNum) {
+void sigintHandler(int sigNum) {
     printf(" received.  Gracefully exiting...\n");
     fflush(stdout);
     exit(0);
 }
 
-void node(int id, int read_fd, int write_fd) {
+void node(int id, int readFD, int writeFD) {
     Message receivedMessage;
     while (1) {
-        read(read_fd, &receivedMessage, sizeof(receivedMessage));
+        read(readFD, &receivedMessage, sizeof(receivedMessage));
         if (id == receivedMessage.targetNode) {
             printf("[Target Node %d] has the apple and recieved the message: \"%s\"\n", id, receivedMessage.message);
             strcpy(receivedMessage.message, "empty");
@@ -41,17 +41,17 @@ void node(int id, int read_fd, int write_fd) {
         } else {
             printf("[Node %d] has the apple and is passing on this message: \"%s\" for target node %d\n", id, receivedMessage.message, receivedMessage.targetNode);
         }
-        write(write_fd, &receivedMessage, sizeof(receivedMessage));
+        write(writeFD, &receivedMessage, sizeof(receivedMessage));
         if (id == (k-1)) {
             printf("[Node 0] has the apple again. The apple has passed through the ring.\n");
         }
     }
-    close(read_fd);
-    close(write_fd);
+    close(readFD);
+    close(writeFD);
 }
 
 int main () {
-    signal(SIGUSR1, node_creation_handler);
+    signal(SIGUSR1, nodeCreationHandler);
     printf("Enter the number of nodes (k): "); 
     scanf("%d", &k);
 
@@ -67,7 +67,6 @@ int main () {
         }
     }
     printf("[%d] - Node 0 is the parent. It has already been created.\n", getpid());
-    // change number of nodes being created
     int pid;
     for (int i = 1; i < k; i++) {
         pid = fork();
@@ -76,27 +75,26 @@ int main () {
             perror("Fork failed\n");
             exit(1);
         }
-        if (pid == 0) // creates child nodes
+        if (pid == 0) // Child Nodes
         {
             kill(getppid(), SIGUSR1);
             printf("[%d] - Node %d created.\n", getpid(), i);
-            // change read write pipes
-            int read_fd = pipes[i][READ];
-            int write_fd = pipes[(i + 1) % k][WRITE];
-            node(i, read_fd, write_fd);
+            int readFD = pipes[i][READ];
+            int writeFD = pipes[(i + 1) % k][WRITE];
+            node(i, readFD, writeFD);
         }
     }
      while (nodesCreated < (k - 1)) {
         pause();  // Wait for signals indicating node creation
     }
 
-    // Node 0
-    signal(SIGINT, sigint_handler);
+    // Parent Node
+    signal(SIGINT, sigintHandler);
     
     Message messageToSend;
     Message finalReceivedMessage;
-    int write_fd = pipes[1][WRITE];
-    int read_fd = pipes[0][READ];
+    int writeFD = pipes[1][WRITE];
+    int readFD = pipes[0][READ];
     getchar(); 
 
     while (1) {
@@ -108,9 +106,8 @@ int main () {
         scanf("%d", &messageToSend.targetNode);
         getchar();
 
-        write(write_fd, &messageToSend, sizeof(messageToSend));
-        printf("Node 0 is reading from node %d\n", (k-1));
-        read(read_fd, &finalReceivedMessage, sizeof(finalReceivedMessage));
+        write(writeFD, &messageToSend, sizeof(messageToSend));
+        read(readFD, &finalReceivedMessage, sizeof(finalReceivedMessage));
 
         if (strcmp(finalReceivedMessage.message, "empty") == 0) {
             printf("The message reached the target and the parent now has the apple.\n");
@@ -129,7 +126,7 @@ int main () {
             break;
         }
     }
-    close(write_fd);
-    close(read_fd);
+    close(writeFD);
+    close(readFD);
     return 0;
 }
