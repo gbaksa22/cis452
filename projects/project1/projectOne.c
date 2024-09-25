@@ -11,14 +11,20 @@
 #define WRITE 1
 
 int k;
+int nodesCreated = 0;
 
 typedef struct {
     int targetNode;
     char message[256];
 } Message;
 
+void node_creation_handler(int sig) {
+    nodesCreated++;
+}
+
 void sigint_handler(int sigNum) {
     printf(" received.  Gracefully exiting...\n");
+    fflush(stdout);
     exit(0);
 }
 
@@ -46,6 +52,7 @@ void node(int id, int read_fd, int write_fd) {
 
 int main () {
     signal(SIGINT, sigint_handler);
+    signal(SIGUSR1, node_creation_handler);
 
     printf("Enter the number of nodes (k): "); 
     scanf("%d", &k);
@@ -73,14 +80,18 @@ int main () {
         }
         if (pid == 0) // creates child nodes
         {
+            kill(getppid(), SIGUSR1);
             printf("[%d] - Node %d created.\n", getpid(), i);
             // change read write pipes
             int read_fd = pipes[i][READ];
-            printf("Node %d writes to node %d. \n", i, ((i + 1) % k));
             int write_fd = pipes[(i + 1) % k][WRITE];
             node(i, read_fd, write_fd);
         }
     }
+     while (nodesCreated < (k - 1)) {
+        pause();  // Wait for signals indicating node creation
+    }
+
     // Node 0
     Message messageToSend;
     Message finalReceivedMessage;
@@ -96,11 +107,7 @@ int main () {
         printf("Enter a node to send the message to: \n"); 
         scanf("%d", &messageToSend.targetNode);
         getchar();
-        //printf("[Node 0] has the apple and is passing on this message: \"%s\" for target node %d\n", receivedMessage.message, receivedMessage.targetNode);
-        // print out parent node has the apple
-        //int write_fd = write(pipes[1][WRITE], &messageToSend, sizeof(messageToSend));
 
-        //int read_fd = read(pipes[k - 1][READ], &messageToSend, sizeof(messageToSend));
         write(write_fd, &messageToSend, sizeof(messageToSend));
         printf("Node 0 is reading from node %d\n", (k-1));
         read(read_fd, &finalReceivedMessage, sizeof(finalReceivedMessage));
@@ -110,7 +117,6 @@ int main () {
         } else {
             printf("The target was never reached, but the parent now has the apple again.\n");
         }
-        //printf("[Node 0] has the apple again. The apple has passed through the ring.\n");
         
         char choice;
         printf("Do you want to send another message? (y/n): ");
@@ -118,10 +124,11 @@ int main () {
         getchar();
 
         if (choice == 'n' || choice == 'N') {
+            printf("Gracefully exiting...\n");
+            fflush(stdout);
             break;
         }
     }
-
     close(write_fd);
     close(read_fd);
     return 0;
