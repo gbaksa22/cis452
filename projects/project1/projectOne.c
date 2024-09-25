@@ -4,12 +4,14 @@
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
+#include <stdbool.h>
+#include <sys/wait.h>
 
 #define READ 0
 #define WRITE 1
 
 int k;
-int apple = 0;
+bool loop = false;
 
 typedef struct {
     int targetNode;
@@ -75,21 +77,34 @@ int main () {
             node(i, read_fd, write_fd);
         }
     }
-
+    if (pid > 0) {
     // Node 0
     Message messageToSend;
     getchar(); 
-    printf("Enter a message: \n"); 
-    fgets(messageToSend.message, sizeof(messageToSend.message), stdin);
-    messageToSend.message[strcspn(messageToSend.message, "\n")] = 0; //ChatGPT helped remove newline char
 
-    printf("Enter a node to send the message to: \n"); 
-    scanf("%d", &messageToSend.targetNode);
-    getchar();
+        while (1) {
+            printf("Enter a message: \n"); 
+            fgets(messageToSend.message, sizeof(messageToSend.message), stdin);
+            messageToSend.message[strcspn(messageToSend.message, "\n")] = 0; //ChatGPT helped remove newline char
 
-    write(pipes[0][WRITE], &messageToSend, sizeof(messageToSend));
+            printf("Enter a node to send the message to: \n"); 
+            scanf("%d", &messageToSend.targetNode);
+            getchar();
 
-    read(pipes[k - 1][READ], &messageToSend, sizeof(messageToSend));
-    printf("[Node 0] has the apple again. The apple has passed through the ring.\n");
+            write(pipes[0][WRITE], &messageToSend, sizeof(messageToSend));
+
+            read(pipes[k - 1][READ], &messageToSend, sizeof(messageToSend));
+            printf("[Node 0] has the apple again. The apple has passed through the ring.\n");
+            
+            char choice;
+            printf("Do you want to send another message? (y/n): ");
+            scanf("%c", &choice);
+            getchar();
+
+            if (choice == 'n' || choice == 'N') {
+                break;
+            }
+        }
+    }
     return 0;
 }
