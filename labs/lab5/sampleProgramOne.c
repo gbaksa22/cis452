@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h> // necessary library for pause
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ipc.h>
@@ -30,7 +31,9 @@ int main()
         exit(1);
     }
 
-    printf("Size of the shared memory segment: %zu bytes\n", shmInfo.shm_segsz);
+    printf("Size of the shared memory segment: %zu bytes\nID of the shared memory segment: %d\n", shmInfo.shm_segsz, shmId);
+
+    pause();
 
     printf("Value a: %p\t Value b: %p\n", (void *)sharedMemoryPtr, (void *)sharedMemoryPtr + FOO);
 
