@@ -12,13 +12,18 @@
 struct sharedData {
     char message[FOO];  
     bool reader1;
-    bool reader2;         
+    bool reader2;
+    bool new_message;
 };
+
+int shmId;
+struct sharedData *sharedMemoryPtr;
 
 int main()
 {
-    int shmId;
-    struct sharedData *sharedMemoryPtr;
+    //create a unique key?
+    //ftok
+
 
     if ((shmId = shmget(IPC_PRIVATE, FOO, IPC_CREAT | S_IRUSR | S_IWUSR)) < 0)
     {
@@ -32,6 +37,11 @@ int main()
         exit(1);
     }
 
+    // initialize flags
+    sharedMemoryPtr->reader1_ready = false;
+    sharedMemoryPtr->reader2_ready = false;
+    sharedMemoryPtr->new_message = false;
+
     while ( 1 ) {
         // do nothing while readers are reading message
         while ( sharedMemoryPtr->reader1 == 0 || sharedMemoryPtr->reader2 == 0 ) {}
@@ -41,7 +51,9 @@ int main()
 
         printf("String in shared memory: %d", sharedMemoryPtr->reader1);
 
-        
+        sharedMemoryPtr->new_message = true;  // Indicate new message
+        sharedMemoryPtr->reader1_ready = false;  // Indicate Reader 1 is not ready
+        sharedMemoryPtr->reader2_ready = false;  // Indicate Reader 2 is not ready
     }
 
     if (shmdt(sharedMemoryPtr) < 0)
