@@ -28,11 +28,11 @@ int main() {
     int shmId;
     struct sharedData *sharedMemoryPtr;
 
-    //ftok
+    key_t key = ftok("writer.c", 'W');
 
-    //shmget
+    shmId = shmget(key, sizeof(struct sharedData), 0);
 
-    //attach
+    sharedMemoryPtr = (struct sharedData *)shmat(shmId, NULL, 0);
 
     //loop
 
