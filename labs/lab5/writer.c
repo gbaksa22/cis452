@@ -24,8 +24,15 @@ void handleSignal(int signal) {
     sharedMemoryPtr->readerTwoReady = false;
     sharedMemoryPtr->newMessage = false;
 
-    shmdt(sharedMemoryPtr);
-    shmctl(shmId, IPC_RMID, 0);
+    if (shmdt(sharedMemoryPtr) < 0) {
+            perror("Unable to detach\n");
+            exit(1);
+    }
+    
+    if (shmctl(shmId, IPC_RMID, 0) < 0) {
+        perror("Unable to deallocate\n");
+        exit(1);
+    }
     exit(0);
 }
 
@@ -74,11 +81,11 @@ int main()
             exit(1);
         }
 
-        if (shmctl(shmId, IPC_RMID, 0) < 0)
-        {
-            perror("Unable to deallocate\n");
-            exit(1);
-        }
+    if (shmctl(shmId, IPC_RMID, 0) < 0)
+    {
+        perror("Unable to deallocate\n");
+        exit(1);
+    }
 
     return 0;
 }

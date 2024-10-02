@@ -20,7 +20,10 @@ int shmId;
 struct sharedData *sharedMemoryPtr;
 
 void handleSignal(int signal) {
-    shmdt(sharedMemoryPtr);
+    if (shmdt(sharedMemoryPtr) < 0) {
+            perror("Unable to detach\n");
+            exit(1);
+    }
     exit(0);
 }
 
@@ -29,10 +32,22 @@ int main() {
     struct sharedData *sharedMemoryPtr;
 
     key_t key = ftok("writer.c", 'W');
+    if (key == -1) {
+        perror("ftok failed");
+        exit(1);
+    }
 
     shmId = shmget(key, sizeof(struct sharedData), 0);
+    if (shmId < 0) { //ChatGPT helped with error checking
+        perror("Unable to get shared memory\n");
+        exit(1);
+    }
 
     sharedMemoryPtr = (struct sharedData *)shmat(shmId, NULL, 0);
+    if (sharedMemoryPtr == (void *)-1) { //ChatGPT helped with error checking
+        perror("Unable to attach\n");
+        exit(1);
+    }
 
     while (1) {
         if (sharedMemoryPtr->newMessage) {
@@ -47,7 +62,10 @@ int main() {
     }
 
 
-    shmdt(sharedMemoryPtr);
+    if (shmdt(sharedMemoryPtr) < 0) { //ChatGPT helped with error checking
+        perror("Unable to detach\n");
+        exit(1);
+    }
 
     return 0;
 }
