@@ -34,9 +34,20 @@ int main() {
 
     sharedMemoryPtr = (struct sharedData *)shmat(shmId, NULL, 0);
 
-    //loop
+    while (1) {
+        if (sharedMemoryPtr->newMessage) {
+            printf("Reader received message: %s", sharedMemoryPtr->message);
+            if (sharedMemoryPtr->readerOneReady == false) {
+                sharedMemoryPtr->readerOneReady = true;
+            } else {
+                sharedMemoryPtr->readerTwoReady = true; 
+            }
+            sharedMemoryPtr->newMessage = false; 
+        }
+    }
 
-    //detach
+
+    shmdt(sharedMemoryPtr);
 
     return 0;
 }
