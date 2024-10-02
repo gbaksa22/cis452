@@ -11,18 +11,18 @@
 // recommended by Bobeldyk
 struct sharedData {
     char message[FOO];  
-    bool reader1;
-    bool reader2;
-    bool new_message;
+    bool readerOneReady;
+    bool readerTwoReady;
+    bool newMessage;
 };
 
 int shmId;
 struct sharedData *sharedMemoryPtr;
 
 void handleSignal(int signal) {
-    sharedMemoryPtr->reader1_ready = false;
-    sharedMemoryPtr->reader2_ready = false;
-    sharedMemoryPtr->new_message = false;
+    sharedMemoryPtr->readerOneReady = false;
+    sharedMemoryPtr->readerTwoReady = false;
+    sharedMemoryPtr->newMessage = false;
 
     shmdt(sharedMemoryPtr);
     shmctl(shmId, IPC_RMID, 0);
@@ -38,8 +38,6 @@ int main()
         exit(1);
     }
 
-
-
     if ((shmId = shmget(IPC_PRIVATE, FOO, IPC_CREAT | S_IRUSR | S_IWUSR)) < 0)
     {
         perror("Unable to get shared memory\n");
@@ -52,10 +50,9 @@ int main()
         exit(1);
     }
 
-    // initialize flags
-    sharedMemoryPtr->reader1_ready = false;
-    sharedMemoryPtr->reader2_ready = false;
-    sharedMemoryPtr->new_message = false;
+    sharedMemoryPtr->readerOneReady = false;
+    sharedMemoryPtr->readerTwoReady = false;
+    sharedMemoryPtr->newMessage = false;
 
     signal(SIGINT, handleSignal);
 
@@ -66,11 +63,9 @@ int main()
         printf("Enter a string: ");
         fgets(sharedMemoryPtr->message, FOO, stdin);
 
-        printf("String in shared memory: %d", sharedMemoryPtr->reader1);
-
-        sharedMemoryPtr->new_message = true;  // Indicate new message
-        sharedMemoryPtr->reader1_ready = false;  // Indicate Reader 1 is not ready
-        sharedMemoryPtr->reader2_ready = false;  // Indicate Reader 2 is not ready
+        sharedMemoryPtr->newMessage = true;
+        sharedMemoryPtr->readerOneReady = false;
+        sharedMemoryPtr->readerTwoReady = false;
     }
 
     if (shmdt(sharedMemoryPtr) < 0)
