@@ -20,6 +20,7 @@ int shmId;
 struct sharedData *sharedMemoryPtr;
 
 void handleSignal(int signal) {
+    printf("\nReader shutting down gracefully...\n");
     if (shmdt(sharedMemoryPtr) < 0) {
             perror("Unable to detach\n");
             exit(1);
@@ -28,9 +29,6 @@ void handleSignal(int signal) {
 }
 
 int main() {
-    int shmId;
-    struct sharedData *sharedMemoryPtr;
-
     key_t key = ftok("writer.c", 'W');
     if (key == -1) {
         perror("ftok failed");
@@ -48,6 +46,8 @@ int main() {
         perror("Unable to attach\n");
         exit(1);
     }
+
+    signal(SIGINT, handleSignal);
 
     while (1) {
         if (sharedMemoryPtr->newMessage) {

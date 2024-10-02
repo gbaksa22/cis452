@@ -20,6 +20,7 @@ int shmId;
 struct sharedData *sharedMemoryPtr;
 
 void handleSignal(int signal) {
+    printf("\nWriter shutting down gracefully...\n");
     sharedMemoryPtr->readerOneReady = false;
     sharedMemoryPtr->readerTwoReady = false;
     sharedMemoryPtr->newMessage = false;
@@ -28,7 +29,7 @@ void handleSignal(int signal) {
             perror("Unable to detach\n");
             exit(1);
     }
-    
+
     if (shmctl(shmId, IPC_RMID, 0) < 0) {
         perror("Unable to deallocate\n");
         exit(1);
@@ -69,6 +70,10 @@ int main()
 
         printf("Enter a string: ");
         fgets(sharedMemoryPtr->message, FOO, stdin);
+
+        if (strncmp(sharedMemoryPtr->message, "quit", 4) == 0) {
+            raise(SIGINT); //asked ChatGPT how to use sigint handler with quit
+        }
 
         sharedMemoryPtr->newMessage = true;
         sharedMemoryPtr->readerOneReady = false;
