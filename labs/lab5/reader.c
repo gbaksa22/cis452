@@ -66,8 +66,10 @@ int main() {
             printf("Reader received message: %s", sharedMemoryPtr->message);
             if (sharedMemoryPtr->readerOneReady == 0) {
                 sharedMemoryPtr->readerOneReady = 1;
+                printf("Reader 1 is now ready.\n");
             } else {
                 sharedMemoryPtr->readerTwoReady = 1; 
+                printf("Reader 2 is now ready.\n");
             }
             sharedMemoryPtr->newMessage = 0; 
         }

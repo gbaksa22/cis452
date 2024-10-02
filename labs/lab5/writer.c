@@ -72,7 +72,7 @@ int main()
     printf("\nWaiting for both readers...\n");
     while ( 1 ) {
         // do nothing while readers are reading message
-        while ( sharedMemoryPtr->readerOneReady == 0 || sharedMemoryPtr->readerTwoReady == 0 ) {}
+        while ( sharedMemoryPtr->readerOneReady == 0 && sharedMemoryPtr->readerTwoReady == 0 ) {}
 
         printf("Enter a string: ");
         fgets(sharedMemoryPtr->message, FOO, stdin);
