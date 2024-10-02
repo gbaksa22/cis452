@@ -31,8 +31,13 @@ void handleSignal(int signal) {
 
 int main()
 {
-    //create a unique key?
-    //ftok
+    // must use the same pathname as argument to get the same key in both files - double checked with ChatGPT
+    key_t key = ftok("writer.c", 'W'); 
+    if (key == -1) {
+        perror("ftok failed");
+        exit(1);
+    }
+
 
 
     if ((shmId = shmget(IPC_PRIVATE, FOO, IPC_CREAT | S_IRUSR | S_IWUSR)) < 0)
