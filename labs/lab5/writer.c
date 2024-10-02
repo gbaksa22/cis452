@@ -19,6 +19,16 @@ struct sharedData {
 int shmId;
 struct sharedData *sharedMemoryPtr;
 
+void handleSignal(int signal) {
+    sharedMemoryPtr->reader1_ready = false;
+    sharedMemoryPtr->reader2_ready = false;
+    sharedMemoryPtr->new_message = false;
+
+    shmdt(sharedMemoryPtr);
+    shmctl(shmId, IPC_RMID, 0);
+    exit(0);
+}
+
 int main()
 {
     //create a unique key?
@@ -41,6 +51,8 @@ int main()
     sharedMemoryPtr->reader1_ready = false;
     sharedMemoryPtr->reader2_ready = false;
     sharedMemoryPtr->new_message = false;
+
+    signal(SIGINT, handleSignal);
 
     while ( 1 ) {
         // do nothing while readers are reading message
