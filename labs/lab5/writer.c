@@ -69,7 +69,7 @@ int main()
 
     signal(SIGINT, handleSignal);
 
-    printf("\nWaiting for both readers...\n");
+    printf("\nWaiting for a reader...\n");
     while ( 1 ) {
         // do nothing while readers are reading message
         while ( sharedMemoryPtr->readerOneReady == 0 && sharedMemoryPtr->readerTwoReady == 0 ) {}
