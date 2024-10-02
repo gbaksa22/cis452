@@ -4,16 +4,17 @@
 #include <sys/stat.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <stdbool.h>
+#include <signal.h>
+#include <string.h>
 
 #define FOO 4096
 
 // recommended by Bobeldyk
 struct sharedData {
     char message[FOO];  
-    bool readerOneReady;
-    bool readerTwoReady;
-    bool newMessage;
+    int readerOneReady;
+    int readerTwoReady;
+    int newMessage;
 };
 
 int shmId;
@@ -21,6 +22,7 @@ struct sharedData *sharedMemoryPtr;
 
 void handleSignal(int signal) {
     printf("\nReader shutting down gracefully...\n");
+    sharedMemoryPtr->newMessage = 0;
     if (shmdt(sharedMemoryPtr) < 0) {
             perror("Unable to detach\n");
             exit(1);
@@ -49,15 +51,25 @@ int main() {
 
     signal(SIGINT, handleSignal);
 
+    if (sharedMemoryPtr->readerOneReady == 0) {
+                sharedMemoryPtr->readerOneReady = 1;
+            } else {
+                sharedMemoryPtr->readerTwoReady = 1; 
+            }
+            sharedMemoryPtr->newMessage = 0; 
+
     while (1) {
         if (sharedMemoryPtr->newMessage) {
-            printf("Reader received message: %s", sharedMemoryPtr->message);
-            if (sharedMemoryPtr->readerOneReady == false) {
-                sharedMemoryPtr->readerOneReady = true;
-            } else {
-                sharedMemoryPtr->readerTwoReady = true; 
+            if (strncmp(sharedMemoryPtr->message, "quit", 4) == 0) {
+                raise(SIGINT);
             }
-            sharedMemoryPtr->newMessage = false; 
+            printf("Reader received message: %s", sharedMemoryPtr->message);
+            if (sharedMemoryPtr->readerOneReady == 0) {
+                sharedMemoryPtr->readerOneReady = 1;
+            } else {
+                sharedMemoryPtr->readerTwoReady = 1; 
+            }
+            sharedMemoryPtr->newMessage = 0; 
         }
     }
 
