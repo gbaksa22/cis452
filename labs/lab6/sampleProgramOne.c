@@ -45,8 +45,10 @@ int main(int argc, char *argv[])
     { // Child
         for (i = 0; i < loop; i++)
         {
-            // swap the contents of sharedMemoryPointer[0] and
-            sharedMemoryPointer[1]
+            // swap the contents of sharedMemoryPointer[0] and sharedMemoryPointer[1]
+            temp = sharedMemoryPointer[0];
+            sharedMemoryPointer[0] = sharedMemoryPointer[1];
+            sharedMemoryPointer[1] = temp;
         }
         if (shmdt(sharedMemoryPointer) < 0)
         {
@@ -58,8 +60,10 @@ int main(int argc, char *argv[])
     else
         for (i = 0; i < loop; i++)
         {
-            // swap the contents of sharedMemoryPointer[1] and
-            sharedMemoryPointer[0]
+            // swap the contents of sharedMemoryPointer[1] and sharedMemoryPointer[0]
+            temp = sharedMemoryPointer[1];
+            sharedMemoryPointer[1] = sharedMemoryPointer[0];
+            sharedMemoryPointer[0] = temp;
         }
 
     wait(&status);
