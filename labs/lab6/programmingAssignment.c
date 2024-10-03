@@ -83,10 +83,20 @@ int main(int argc, char *argv[])
     else
         for (i = 0; i < loop; i++)
         {
+            if (semop(semID, &p, 1) < 0) {
+                perror("semop wait failed");
+                exit(1);
+            }
+
             // swap the contents of sharedMemoryPointer[1] and sharedMemoryPointer[0]
             temp = sharedMemoryPointer[1];
             sharedMemoryPointer[1] = sharedMemoryPointer[0];
             sharedMemoryPointer[0] = temp;
+
+            if (semop(semID, &v, 1) < 0) {
+                perror("semop signal failed");
+                exit(1);
+            }
         }
 
     wait(&status);
