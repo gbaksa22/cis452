@@ -2,16 +2,16 @@
 #include <unistd.h>
 
 int main() {
-    long page_size;
-    
-    page_size = sysconf(_SC_PAGESIZE);
+    long pageSize;
+
+    pageSize = sysconf(_SC_PAGESIZE);
 
     if (page_size == -1) {
         perror("sysconf failed");
         return 1;
     }
 
-    printf("Page size: %ld bytes\n", page_size);
+    printf("Page size: %ld bytes\n", pageSize);
 
     return 0;
 }
