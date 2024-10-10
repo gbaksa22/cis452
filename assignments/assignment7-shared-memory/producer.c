@@ -10,13 +10,14 @@
 typedef struct myStruct {
     int value;
     char message[40];
-};
-//Generate a shared key using the ‘ftok’ command by referencing ‘producer.c’ as the filename. 
-key_t key ftok('producer.c', 'W');
+} myStruct;
 
 int sharedMemoryID;
 struct myStruct *sharedMemoryPointer;
+
 int main() {
+    //Generate a shared key using the ‘ftok’ command by referencing ‘producer.c’ as the filename. 
+    key_t key = ftok("producer.c", 'W');
     // Create a shared memory segment using the ‘shmget’ command. 
     // The size of the shared memory segment should be the same size as the struct ‘myStruct’.
     // Use the following string for the permissions: “S_IWUSR|S_IRUSR|S_IRGRP|S_IWGRP|IPC_CREAT”.
@@ -46,10 +47,6 @@ int main() {
         exit(1);
     }
 
-    if (shmctl(sharedMemoryID, IPC_RMID, 0) < 0) {
-        perror("Unable to deallocate\n");
-        exit(1);
-    }
     return 0;
 }
 /* 
