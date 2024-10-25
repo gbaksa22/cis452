@@ -1,43 +1,78 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Global variables
-int global_var_initialized = 10;  // Initialized data
-int global_var_initialized2 = 20; // Initialized data
-int global_var_uninitialized;     // Uninitialized data (BSS)
-int global_var_uninitialized2;    // Uninitialized data (BSS)
+int globalVarInitialized = 10;
+int globalVarInitialized2 = 20;
+int globalVarUninitialized;
+int globalVarUninitialized2;
 
-// Function to represent the text/code segment
-void print_memory_addresses() {
-    // Stack variables
-    int stack_var1 = 1;
-    int stack_var2 = 2;
+void recursiveStack(int depth) {
+    int recursiveStackVar = depth;
 
-    // Dynamically allocated memory (Heap)
-    char *heap_var1 = malloc(sizeof(char) * 10);  // Heap variable 1
-    char *heap_var2 = malloc(sizeof(char) * 10);  // Heap variable 2
-    
-    // Printing addresses of the memory segments
+    if (depth == 3) {
+        printf("1st stack address: %p\n", (void*)&recursiveStackVar);
+    } else if (depth == 2) {
+        printf("2nd stack address: %p\n", (void*)&recursiveStackVar);
+    } else if (depth == 1) {
+        printf("3rd stack address: %p\n", (void*)&recursiveStackVar);
+    } else {
+        printf("%dth stack address: %p\n", 4 - depth, (void*)&recursiveStackVar);
+    }
 
-    printf("Stack - Address of stack_var1: %p\n", (void*)&stack_var1);
-    printf("Stack - Address of stack_var2: %p\n\n", (void*)&stack_var2);
+    if (depth > 0) {
+        recursiveStack(depth - 1);
+    }
+}
 
-    printf("Heap - Address of heap_var1: %p\n", (void*)heap_var1);
-    printf("Heap - Address of heap_var2: %p\n\n", (void*)heap_var2);
+void recursiveHeap(int depth) {
+    char *heapVar = malloc(sizeof(char) * 10);
 
-    printf("Data - Address of global_var_initialized: %p\n", (void*)&global_var_initialized);
-    printf("Data - Address of global_var_initialized2: %p\n\n", (void*)&global_var_initialized2);
+    if (depth == 3) {
+        printf("1st heap address: %p\n", (void*)heapVar);
+    } else if (depth == 2) {
+        printf("2nd heap address: %p\n", (void*)heapVar);
+    } else if (depth == 1) {
+        printf("3rd heap address: %p\n", (void*)heapVar);
+    } else {
+        printf("%dth heap address: %p\n", 4 - depth, (void*)heapVar);
+    }
 
-    printf("BSS - Address of global_var_uninitialized: %p\n", (void*)&global_var_uninitialized);
-    printf("BSS - Address of global_var_uninitialized2: %p\n\n", (void*)&global_var_uninitialized2);
+    if (depth > 0) {
+        recursiveHeap(depth - 1);
+    }
 
-    printf("Text - Address of print_memory_addresses: %p\n\n", (void*)&print_memory_addresses);
-    // Freeing dynamically allocated memory
-    free(heap_var1);
-    free(heap_var2);
+    free(heapVar);
+}
+
+void printMemoryAddresses() {
+    int stackVar1 = 1;
+    int stackVar2 = 2;
+
+    char *heapVar1 = malloc(sizeof(char) * 10);
+    char *heapVar2 = malloc(sizeof(char) * 10);
+
+    printf("Stack - Address of stackVar1: %p\n", (void*)&stackVar1);
+    printf("Stack - Address of stackVar2: %p\n\n", (void*)&stackVar2);
+
+    printf("Heap - Address of heapVar1: %p\n", (void*)heapVar1);
+    printf("Heap - Address of heapVar2: %p\n\n", (void*)heapVar2);
+
+    printf("Data/BSS - Address of globalVarInitialized: %p\n", (void*)&globalVarInitialized);
+    printf("Data/BSS - Address of globalVarInitialized2: %p\n", (void*)&globalVarInitialized2);
+    printf("Data/BSS - Address of globalVarUninitialized: %p\n", (void*)&globalVarUninitialized);
+    printf("Data/BSS - Address of globalVarUninitialized2: %p\n\n", (void*)&globalVarUninitialized2);
+
+    printf("Text - Address of printMemoryAddresses: %p\n\n", (void*)&printMemoryAddresses);
+
+    free(heapVar1);
+    free(heapVar2);
+
+    printf("Recursion begins to observe stack and heap growth:\n");
+    recursiveStack(3);
+    recursiveHeap(3);
 }
 
 int main() {
-    print_memory_addresses();
+    printMemoryAddresses();
     return 0;
 }
