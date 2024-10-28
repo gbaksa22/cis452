@@ -2,27 +2,39 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SIZE 16
+#define INITIAL_SIZE 16
+#define GROWTH_FACTOR 2
 
-int main() 
-{
-    size_t current_size = SIZE;
-    char *data1 = malloc(current_size);
+int main() {
+    char *data1;
+    size_t size = INITIAL_SIZE;
+    size_t length = 0;
+
+    data1 = malloc(size);
+    if (data1 == NULL) {
+        perror("Unable to allocate memory");
+        return 1;
+    }
 
     printf("Please input username: ");
 
-    while (fgets(data1, current_size, stdin)) {
-        size_t len = strlen(data1);
-        if (len > 0 && data1[len - 1] == '\n') {
-            data1[len - 1] = '\0';
-            break;
+    int ch;
+    while ((ch = getchar()) != '\n' && ch != EOF) {
+        if (length + 1 >= size) {
+            size *= GROWTH_FACTOR;
+            char *new_data = realloc(data1, size);
+            if (new_data == NULL) {
+                perror("Unable to reallocate memory");
+                free(data1);
+                return 1;
+            }
+            data1 = new_data;
         }
 
-        current_size *= 2;
-        char *temp = realloc(data1, current_size);
-        data1 = temp;
-        printf("Input too long, please input username (again): ");
+        data1[length++] = ch;
     }
+
+    data1[length] = '\0';
 
     printf("You entered: [%s]\n", data1);
     free(data1);
