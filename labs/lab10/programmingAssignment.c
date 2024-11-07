@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <stdio.h>
+#include <math.h>
 
 int main() {
     // 1. Query the system for page size
@@ -8,7 +9,7 @@ int main() {
     printf("Page size: %lu bytes\n", sysInfo.dwPageSize);
 
     // 2. Allocate 1 MB (2^20 bytes) of memory
-    SIZE_T memorySize = 1 << 20; // 1 MB
+    SIZE_T memorySize = (SIZE_T)pow(2, 20); // 1 MB
     LPVOID allocatedMemory = VirtualAlloc(NULL, memorySize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
     if (allocatedMemory == NULL) {
