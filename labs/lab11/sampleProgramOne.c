@@ -19,5 +19,15 @@ int main(int argc, char *argv[])
     }
     printf("value is: %u\n", statBuf.st_mode);
     printf("inode value is: %lu\n", statBuf.st_ino);
+
+    if (S_ISDIR(statBuf.st_mode))
+    {
+        printf("This file is a directory.\n");
+    }
+    else
+    {
+        printf("This file is not a directory.\n");
+    }
+
     return 0;
 }
