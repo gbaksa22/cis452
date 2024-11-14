@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 
+// Used ChatGPT as a reference for some of the systems calls
+
 int main() {
     // 1. Query the system for page size
     SYSTEM_INFO sysInfo;
