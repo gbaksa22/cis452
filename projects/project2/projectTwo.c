@@ -50,6 +50,16 @@ void *baker(void *arg) {
     int baker_id = *(int *)arg;
     free(arg);
 
+    //current recipe working on chosen, so that bakers arent all working on the same ones
+
+    //if access to refrigerator, grab ingredient you dont have for current recipe
+
+    //if access to pantry, grab ingredient you dont have for current recipe
+
+    //bowl, spoon, mixer needed, only grab the 3 at the same time if all 3 are available that way we dont block someone
+
+    //oven
+
     // implement baker recipe logic here
     return NULL;
 }
