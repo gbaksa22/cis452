@@ -175,6 +175,17 @@ void *baker(void *arg) {
 
     //oven
 
+    // Acquire the oven
+    use_resource(semID, OVEN, "Oven", baker_id);
+
+    // Simulate baking in the oven
+    printf("Baker %d: Baking recipe in the Oven\n", baker_id);
+
+    // Release the oven
+    release_resource(semID, OVEN, "Oven", baker_id);
+
+    printf("Baker %d: Finished baking!\n", baker_id);
+
     // implement baker recipe logic here
     return NULL;
 }
