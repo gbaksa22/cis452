@@ -51,6 +51,14 @@ void *baker(void *arg) {
     free(arg);
 
     //current recipe working on chosen, so that bakers arent all working on the same ones
+    const char *recipes[] = {"Cookies", "Pancakes", "Pizza Dough", "Soft Pretzels", "Cinnamon Rolls"};
+    const int num_recipes = 5;
+
+    // Randomly choose a recipe for this baker to work on
+    srand(time(NULL) + baker_id); // Ensure different seeds for each thread
+    int recipe_index = rand() % num_recipes; // Random recipe index
+
+    printf("Baker %d: Working on recipe %s\n", baker_id, recipes[recipe_index]);
 
     //if access to refrigerator, grab ingredient you dont have for current recipe
 
