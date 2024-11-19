@@ -1,7 +1,3 @@
-Here’s a spruced-up version of your README with polished language, improved formatting, and a clearer structure to make it more engaging and user-friendly.
-
----
-
 # Project README
 
 ## Overview
@@ -110,7 +106,3 @@ Once the ingredients are mixed, the baker uses the oven to bake the recipe. The 
    ```
 
 4. Watch the terminal for live updates as the bakers complete their tasks!
-
----
-
-This polished version improves readability and structure, highlights the main features, and makes it clear how the program operates. Let me know if you'd like further adjustments!
