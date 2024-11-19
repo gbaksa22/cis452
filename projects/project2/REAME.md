@@ -39,3 +39,17 @@
 
 4. **Release Resources**:
    - The semaphore values for all three resources are incremented (`+1`) after mixing is complete, making the utensils available for other bakers.
+
+### Baking with the Oven
+- Only one baker can use the oven at a time.
+- The oven must be acquired after mixing is completed.
+- Simulate "baking" by printing a message.
+
+1. **Acquire the Oven**:
+   - The `use_resource` function locks the oven semaphore so only one baker can use it at a time.
+
+2. **Simulate Baking**:
+   - Print a message to indicate the baker is "baking" the recipe.
+
+3. **Release the Oven**:
+   - The `release_resource` function unlocks the oven semaphore so it’s available for the next baker.
