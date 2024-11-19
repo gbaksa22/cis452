@@ -46,6 +46,28 @@ void release_resource(int semID, int resource_index, const char *resource_name, 
     printf("Baker %d: Released %s\n", baker_id, resource_name);
 }
 
+// Helper function: Check if an ingredient is in the refrigerator
+int is_in_refrigerator(const char *ingredient) {
+    const char *refrigerator_items[] = {"Egg", "Milk", "Butter"};
+    for (int i = 0; i < 3; i++) {
+        if (strcmp(ingredient, refrigerator_items[i]) == 0) {
+            return 1; // Found in refrigerator
+        }
+    }
+    return 0; // Not in refrigerator
+}
+
+// Helper function: Check if an ingredient is in the pantry
+int is_in_pantry(const char *ingredient) {
+    const char *pantry_items[] = {"Flour", "Sugar", "Yeast", "Baking Soda", "Salt", "Cinnamon"};
+    for (int i = 0; i < 6; i++) {
+        if (strcmp(ingredient, pantry_items[i]) == 0) {
+            return 1; // Found in pantry
+        }
+    }
+    return 0; // Not in pantry
+}
+
 void *baker(void *arg) {
     int baker_id = *(int *)arg;
     free(arg);
