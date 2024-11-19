@@ -134,6 +134,45 @@ void *baker(void *arg) {
 
     //bowl, spoon, mixer needed, only grab the 3 at the same time if all 3 are available that way we dont block someone
 
+    // Acquire all 3 utensils: Bowl, Spoon, Mixer
+    struct sembuf utensil_ops[3];
+
+    // Prepare semaphore operations for acquiring resources
+    utensil_ops[0].sem_num = BOWL;
+    utensil_ops[0].sem_op = -1; // Wait for a bowl
+    utensil_ops[0].sem_flg = SEM_UNDO;
+
+    utensil_ops[1].sem_num = SPOON;
+    utensil_ops[1].sem_op = -1; // Wait for a spoon
+    utensil_ops[1].sem_flg = SEM_UNDO;
+
+    utensil_ops[2].sem_num = MIXER;
+    utensil_ops[2].sem_op = -1; // Wait for a mixer
+    utensil_ops[2].sem_flg = SEM_UNDO;
+
+    // Attempt to acquire all utensils
+    if (semop(semID, utensil_ops, 3) < 0) {
+        perror("Error acquiring Bowl, Spoon, and Mixer");
+        exit(1);
+    }
+
+    printf("Baker %d: Acquired Bowl, Spoon, and Mixer\n", baker_id);
+
+    // Simulate mixing the ingredients
+    printf("Baker %d: Mixing ingredients\n", baker_id);
+
+    // Release all 3 utensils
+    utensil_ops[0].sem_op = 1; // Signal for a bowl
+    utensil_ops[1].sem_op = 1; // Signal for a spoon
+    utensil_ops[2].sem_op = 1; // Signal for a mixer
+
+    if (semop(semID, utensil_ops, 3) < 0) {
+        perror("Error releasing Bowl, Spoon, and Mixer");
+        exit(1);
+    }
+
+    printf("Baker %d: Released Bowl, Spoon, and Mixer\n", baker_id);
+
     //oven
 
     // implement baker recipe logic here
