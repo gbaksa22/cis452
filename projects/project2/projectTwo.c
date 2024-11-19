@@ -64,6 +64,52 @@ void *baker(void *arg) {
 
     //if access to pantry, grab ingredient you dont have for current recipe
 
+    int acquired_ingredients = 0;
+    const char *needed_ingredients[6];
+    int num_ingredients = 0;
+
+    // Collect the list of ingredients for the current recipe
+    for (int i = 0; recipe_ingredients[recipe_index][i] != NULL; i++) {
+        needed_ingredients[num_ingredients++] = recipe_ingredients[recipe_index][i];
+    }
+
+    // Keep track of which ingredients have been acquired
+    int is_acquired[6] = {0}; // 1 if acquired, 0 otherwise
+
+    while (acquired_ingredients < num_ingredients) {
+        int ingredient_acquired = 0; // Track if an ingredient was successfully acquired
+
+        for (int i = 0; i < num_ingredients; i++) {
+            if (is_acquired[i]) continue; // Skip already acquired ingredients
+
+            const char *ingredient = needed_ingredients[i];
+            if (is_in_refrigerator(ingredient)) {
+                // Attempt to acquire refrigerator
+                p.sem_num = REFRIGERATOR;
+                if (semop(semID, &p, 1) == 0) { // Successfully acquired refrigerator
+                    printf("Baker %d: Got %s from Refrigerator\n", baker_id, ingredient);
+                    is_acquired[i] = 1;
+                    acquired_ingredients++;
+                    ingredient_acquired = 1;
+                    release_resource(semID, REFRIGERATOR, "Refrigerator", baker_id);
+                }
+            } else if (is_in_pantry(ingredient)) {
+                // Attempt to acquire pantry
+                p.sem_num = PANTRY;
+                if (semop(semID, &p, 1) == 0) { // Successfully acquired pantry
+                    printf("Baker %d: Got %s from Pantry\n", baker_id, ingredient);
+                    is_acquired[i] = 1;
+                    acquired_ingredients++;
+                    ingredient_acquired = 1;
+                    release_resource(semID, PANTRY, "Pantry", baker_id);
+                }
+            }
+        }
+
+    // If no ingredient was acquired, loop continues immediately without waiting
+}
+
+
     //bowl, spoon, mixer needed, only grab the 3 at the same time if all 3 are available that way we dont block someone
 
     //oven
