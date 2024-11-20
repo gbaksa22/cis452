@@ -5,6 +5,8 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <unistd.h>
+#include <string.h>
+
 
 
 // resource indices used in the semaphore, chatgpt helped with this
@@ -27,6 +29,16 @@ struct sembuf p = { 0, -1, SEM_UNDO}; // wait
 struct sembuf v = { 0, +1, SEM_UNDO}; // signal
 
 int semID;
+
+// Define globally at the top of the file
+const char *recipe_ingredients[5][6] = {
+    {"Flour", "Sugar", "Milk", "Butter", NULL, NULL},         // Cookies
+    {"Flour", "Sugar", "Baking Soda", "Salt", "Egg", "Milk"}, // Pancakes
+    {"Yeast", "Sugar", "Salt", NULL, NULL, NULL},             // Pizza Dough
+    {"Flour", "Sugar", "Salt", "Yeast", "Baking Soda", "Egg"},// Soft Pretzels
+    {"Flour", "Sugar", "Salt", "Butter", "Egg", "Cinnamon"}   // Cinnamon Rolls
+};
+
 
 void use_resource(int semID, int resource_index, const char *resource_name, int baker_id) {
     p.sem_num = resource_index; // here is where the resource index is used
