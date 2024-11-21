@@ -80,39 +80,22 @@ int is_in_pantry(const char *ingredient) {
     return 0; // Not in pantry
 }
 
-void *baker(void *arg) {
-    int baker_id = *(int *)arg;
-    free(arg);
+int select_recipe(int completed_recipes[], int num_recipes, int baker_id) {
+    srand(time(NULL) + baker_id); // Seed random generator uniquely
+    int recipe_index;
+    do {
+        recipe_index = rand() % num_recipes; // Randomly select a recipe
+    } while (completed_recipes[recipe_index]); // Ensure the recipe hasn't been completed
 
-    //current recipe working on chosen, so that bakers arent all working on the same ones
-    const char *recipes[] = {"Cookies", "Pancakes", "Pizza Dough", "Soft Pretzels", "Cinnamon Rolls"};
-    const int num_recipes = 5;
+    completed_recipes[recipe_index] = 1; // Mark the recipe as completed
+    return recipe_index;
+}
 
-    // Randomly choose a recipe for this baker to work on
-    srand(time(NULL) + baker_id); // Ensure different seeds for each thread
-    int recipe_index = rand() % num_recipes; // Random recipe index
-
-    printf("Baker %d: Working on recipe %s\n", baker_id, recipes[recipe_index]);
-
-    //if access to refrigerator, grab ingredient you dont have for current recipe
-
-    //if access to pantry, grab ingredient you dont have for current recipe
-
-    int acquired_ingredients = 0;
-    const char *needed_ingredients[6];
-    int num_ingredients = 0;
-
-    // Collect the list of ingredients for the current recipe
-    for (int i = 0; recipe_ingredients[recipe_index][i] != NULL; i++) {
-        needed_ingredients[num_ingredients++] = recipe_ingredients[recipe_index][i];
-    }
-
-    // Keep track of which ingredients have been acquired
+void grab_ingredients(int semID, const char *needed_ingredients[], int num_ingredients, int baker_id) {
     int is_acquired[6] = {0}; // 1 if acquired, 0 otherwise
+    int acquired_ingredients = 0;
 
     while (acquired_ingredients < num_ingredients) {
-        int ingredient_acquired = 0; // Track if an ingredient was successfully acquired
-
         for (int i = 0; i < num_ingredients; i++) {
             if (is_acquired[i]) continue; // Skip already acquired ingredients
 
@@ -124,7 +107,6 @@ void *baker(void *arg) {
                     printf("Baker %d: Got %s from Refrigerator\n", baker_id, ingredient);
                     is_acquired[i] = 1;
                     acquired_ingredients++;
-                    ingredient_acquired = 1;
                     release_resource(semID, REFRIGERATOR, "Refrigerator", baker_id);
                 }
             } else if (is_in_pantry(ingredient)) {
@@ -134,19 +116,14 @@ void *baker(void *arg) {
                     printf("Baker %d: Got %s from Pantry\n", baker_id, ingredient);
                     is_acquired[i] = 1;
                     acquired_ingredients++;
-                    ingredient_acquired = 1;
                     release_resource(semID, PANTRY, "Pantry", baker_id);
                 }
             }
         }
-
-    // If no ingredient was acquired, loop continues immediately without waiting
+    }
 }
 
-
-    //bowl, spoon, mixer needed, only grab the 3 at the same time if all 3 are available that way we dont block someone
-
-    // Acquire all 3 utensils: Bowl, Spoon, Mixer
+void mix_ingredients(int semID, int baker_id) {
     struct sembuf utensil_ops[3];
 
     // Prepare semaphore operations for acquiring resources
@@ -162,6 +139,8 @@ void *baker(void *arg) {
     utensil_ops[2].sem_op = -1; // Wait for a mixer
     utensil_ops[2].sem_flg = SEM_UNDO;
 
+    printf("Baker %d: Waiting for Bowl, Spoon, and Mixer\n", baker_id);
+
     // Attempt to acquire all utensils
     if (semop(semID, utensil_ops, 3) < 0) {
         perror("Error acquiring Bowl, Spoon, and Mixer");
@@ -169,8 +148,6 @@ void *baker(void *arg) {
     }
 
     printf("Baker %d: Acquired Bowl, Spoon, and Mixer\n", baker_id);
-
-    // Simulate mixing the ingredients
     printf("Baker %d: Mixing ingredients\n", baker_id);
 
     // Release all 3 utensils
@@ -184,23 +161,65 @@ void *baker(void *arg) {
     }
 
     printf("Baker %d: Released Bowl, Spoon, and Mixer\n", baker_id);
+}
 
-    //oven
-
+void bake_ingredients(int semID, int baker_id) {
     // Acquire the oven
     use_resource(semID, OVEN, "Oven", baker_id);
 
     // Simulate baking in the oven
-    printf("Baker %d: Baking recipe in the Oven\n", baker_id);
+    printf("Baker %d: Baking ingredients in the Oven\n", baker_id);
 
     // Release the oven
     release_resource(semID, OVEN, "Oven", baker_id);
 
     printf("Baker %d: Finished baking!\n", baker_id);
+}
 
-    // implement baker recipe logic here
+
+void *baker(void *arg) {
+    int baker_id = *(int *)arg;
+    free(arg);
+
+    const char *recipes[] = {"Cookies", "Pancakes", "Pizza Dough", "Soft Pretzels", "Cinnamon Rolls"};
+    int completed_recipes[5] = {0}; // Tracks recipes completed by this baker
+    const int num_recipes = 5;
+
+    while (1) {
+        // Select a recipe that hasn't been made yet
+        int recipe_index = select_recipe(completed_recipes, num_recipes, baker_id);
+        printf("Baker %d: Working on recipe %s\n", baker_id, recipes[recipe_index]);
+
+        // Collect the list of ingredients for the current recipe
+        const char *needed_ingredients[6];
+        int num_ingredients = 0;
+        for (int i = 0; recipe_ingredients[recipe_index][i] != NULL; i++) {
+            needed_ingredients[num_ingredients++] = recipe_ingredients[recipe_index][i];
+        }
+
+        // Grab all necessary ingredients
+        grab_ingredients(semID, needed_ingredients, num_ingredients, baker_id);
+
+        // Mix ingredients
+        mix_ingredients(semID, baker_id);
+
+        // Bake ingredients
+        bake_ingredients(semID, baker_id);
+
+        // Check if all recipes are done
+        int done = 1;
+        for (int i = 0; i < num_recipes; i++) {
+            if (!completed_recipes[i]) {
+                done = 0;
+                break;
+            }
+        }
+        if (done) break; // Exit loop if all recipes are complete
+    }
+
     return NULL;
 }
+
 
 int main() {
     int num_bakers;
