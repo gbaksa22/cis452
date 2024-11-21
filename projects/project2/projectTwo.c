@@ -31,13 +31,14 @@ struct sembuf v = { 0, +1, SEM_UNDO}; // signal
 int semID;
 
 // Define globally at the top of the file
-const char *recipe_ingredients[5][6] = {
-    {"Flour", "Sugar", "Milk", "Butter", NULL, NULL},         // Cookies
-    {"Flour", "Sugar", "Baking Soda", "Salt", "Egg", "Milk"}, // Pancakes
-    {"Yeast", "Sugar", "Salt", NULL, NULL, NULL},             // Pizza Dough
-    {"Flour", "Sugar", "Salt", "Yeast", "Baking Soda", "Egg"},// Soft Pretzels
-    {"Flour", "Sugar", "Salt", "Butter", "Egg", "Cinnamon"}   // Cinnamon Rolls
+const char *recipe_ingredients[5][7] = {
+    {"Flour", "Sugar", "Milk", "Butter", NULL},               // Cookies
+    {"Flour", "Sugar", "Baking Soda", "Salt", "Egg", "Milk", NULL}, // Pancakes
+    {"Yeast", "Sugar", "Salt", NULL},                        // Pizza Dough
+    {"Flour", "Sugar", "Salt", "Yeast", "Baking Soda", "Egg", NULL}, // Soft Pretzels
+    {"Flour", "Sugar", "Salt", "Butter", "Egg", "Cinnamon", NULL}   // Cinnamon Rolls
 };
+
 
 
 void use_resource(int semID, int resource_index, const char *resource_name, int baker_id) {
@@ -194,20 +195,35 @@ void *baker(void *arg) {
     while (1) {
         // Select a recipe that hasn't been made yet
         int recipe_index = select_recipe(completed_recipes, num_recipes, baker_id);
+        if (recipe_index < 0 || recipe_index >= num_recipes) {
+            fprintf(stderr, "Baker %d: Invalid recipe index %d\n", baker_id, recipe_index);
+            pthread_exit(NULL);
+        }
         printf("Baker %d: Working on recipe %s\n", baker_id, recipes[recipe_index]);
 
-        // Collect the list of ingredients for the current recipe
-        const char **needed_ingredients = malloc(6 * sizeof(char *));
+        // Calculate the number of ingredients
+        int num_ingredients = 0;
+        while (recipe_ingredients[recipe_index][num_ingredients] != NULL) {
+            num_ingredients++;
+        }
+
+        // Dynamically allocate memory for needed_ingredients
+        const char **needed_ingredients = malloc(num_ingredients * sizeof(char *));
         if (!needed_ingredients) {
             perror("Unable to allocate memory for needed ingredients");
-            exit(1);
+            pthread_exit(NULL);
         }
 
-        int num_ingredients = 0;
-        for (int i = 0; recipe_ingredients[recipe_index][i] != NULL; i++) {
-            needed_ingredients[num_ingredients++] = recipe_ingredients[recipe_index][i];
+        // Populate needed_ingredients
+        for (int i = 0; i < num_ingredients; i++) {
+            needed_ingredients[i] = recipe_ingredients[recipe_index][i];
         }
 
+        // Debug: Print ingredients
+        printf("Baker %d: Ingredients for recipe %s:\n", baker_id, recipes[recipe_index]);
+        for (int i = 0; i < num_ingredients; i++) {
+            printf("  - %s\n", needed_ingredients[i]);
+        }
 
         // Grab all necessary ingredients
         grab_ingredients(semID, needed_ingredients, num_ingredients, baker_id);
@@ -218,7 +234,9 @@ void *baker(void *arg) {
         // Bake ingredients
         bake_ingredients(semID, baker_id);
 
+        // Free allocated memory
         free(needed_ingredients);
+
         // Check if all recipes are done
         int done = 1;
         for (int i = 0; i < num_recipes; i++) {
