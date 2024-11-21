@@ -96,29 +96,35 @@ void grab_ingredients(int semID, const char *needed_ingredients[], int num_ingre
     int acquired_ingredients = 0;
 
     while (acquired_ingredients < num_ingredients) {
+        int progress = 0; // Track if any ingredient was acquired in this iteration
         for (int i = 0; i < num_ingredients; i++) {
             if (is_acquired[i]) continue; // Skip already acquired ingredients
 
             const char *ingredient = needed_ingredients[i];
             if (is_in_refrigerator(ingredient)) {
-                // Attempt to acquire refrigerator
                 p.sem_num = REFRIGERATOR;
                 if (semop(semID, &p, 1) == 0) { // Successfully acquired refrigerator
                     printf("Baker %d: Got %s from Refrigerator\n", baker_id, ingredient);
                     is_acquired[i] = 1;
                     acquired_ingredients++;
+                    progress = 1;
                     release_resource(semID, REFRIGERATOR, "Refrigerator", baker_id);
                 }
             } else if (is_in_pantry(ingredient)) {
-                // Attempt to acquire pantry
                 p.sem_num = PANTRY;
                 if (semop(semID, &p, 1) == 0) { // Successfully acquired pantry
                     printf("Baker %d: Got %s from Pantry\n", baker_id, ingredient);
                     is_acquired[i] = 1;
                     acquired_ingredients++;
+                    progress = 1;
                     release_resource(semID, PANTRY, "Pantry", baker_id);
                 }
             }
+        }
+
+        if (!progress) {
+            printf("Baker %d: Stuck waiting for ingredients\n", baker_id);
+            break;
         }
     }
 }
@@ -191,11 +197,17 @@ void *baker(void *arg) {
         printf("Baker %d: Working on recipe %s\n", baker_id, recipes[recipe_index]);
 
         // Collect the list of ingredients for the current recipe
-        const char *needed_ingredients[6];
+        const char **needed_ingredients = malloc(6 * sizeof(char *));
+        if (!needed_ingredients) {
+            perror("Unable to allocate memory for needed ingredients");
+            exit(1);
+        }
+
         int num_ingredients = 0;
         for (int i = 0; recipe_ingredients[recipe_index][i] != NULL; i++) {
             needed_ingredients[num_ingredients++] = recipe_ingredients[recipe_index][i];
         }
+
 
         // Grab all necessary ingredients
         grab_ingredients(semID, needed_ingredients, num_ingredients, baker_id);
@@ -206,6 +218,7 @@ void *baker(void *arg) {
         // Bake ingredients
         bake_ingredients(semID, baker_id);
 
+        free(needed_ingredients);
         // Check if all recipes are done
         int done = 1;
         for (int i = 0; i < num_recipes; i++) {
