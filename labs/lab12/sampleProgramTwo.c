@@ -1,4 +1,5 @@
-// where did this come from? <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -10,7 +11,7 @@ int main(int argc, char *argv[])
 {
     struct flock fileLock;
     int fd;
-    char myBuffer[SIZE] = "// where did this come from?";
+    char myBuffer[SIZE];
     if (argc < 2)
     {
         printf("usage: filename\n");
@@ -27,15 +28,19 @@ int main(int argc, char *argv[])
     fileLock.l_len = 0;
 
     // acquire the resource
-    if (fcntl(fd, F_SETLK, &fileLock) < 0)
+    if (fcntl(fd, F_SETLKW, &fileLock) < 0)
     {
         perror("Unable to set file lock");
         exit(1);
     }
 
     // use the resource
-    write(fd, myBuffer, SIZE - 2);
-    sleep(10);
+    if (read(fd, myBuffer, SIZE - 1) > 0) {
+        myBuffer[SIZE - 1] = '\0';
+        printf("First line of the file: %s\n", myBuffer);
+    } else {
+        perror("Error reading file");
+    }
 
     // release the resource
     fileLock.l_type = F_UNLCK;
