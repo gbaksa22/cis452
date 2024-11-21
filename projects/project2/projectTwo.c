@@ -6,7 +6,7 @@
 #include <sys/sem.h>
 #include <unistd.h>
 #include <string.h>
-
+#include <stdbool.h>
 
 
 // resource indices used in the semaphore, chatgpt helped with this
@@ -48,6 +48,7 @@ const char *colors[] = {
 typedef struct {
     int baker_id;
     const char *color;
+    int ramsey_baker;
 } BakerContext;
 
 void use_resource(int semID, int resource_index, const char *resource_name, int baker_id, const char *color) {
@@ -190,18 +191,35 @@ void bake_ingredients(BakerContext *context) {
     printf("%sBaker %d: Finished baking!\033[0m\n", context->color, context->baker_id);
 }
 
+void ramsied(int baker_id, const char *color) {
+    printf("%sBaker %d: Ramsied! Releasing all resources\033[0m\n", color, baker_id);
 
+    release_resource(semID, MIXER, "Mixer", baker_id, color);
+    release_resource(semID, PANTRY, "Pantry", baker_id, color);
+    release_resource(semID, REFRIGERATOR, "Refrigerator", baker_id, color);
+    release_resource(semID, BOWL, "Bowl", baker_id, color);
+    release_resource(semID, SPOON, "Spoon", baker_id, color);
+    release_resource(semID, OVEN, "Oven", baker_id, color);
+}
 
 void *baker(void *arg) {
     BakerContext *context = (BakerContext *)arg;
     int baker_id = context->baker_id;
     const char *color = context->color;
+    int ramsey_baker = context->ramsey_baker;
 
     const char *recipes[] = {"Cookies", "Pancakes", "Pizza Dough", "Soft Pretzels", "Cinnamon Rolls"};
     int completed_recipes[5] = {0}; // Tracks recipes completed by this baker
     const int num_recipes = 5;
 
+    bool ramsied_triggered = false; // ensures baker is only "Ramsied" once
+
     while (1) {
+        if (baker_id == ramsey_baker && !ramsied_triggered && rand() % 10 == 0) {
+            ramsied(baker_id, color);
+            ramsied_triggered = true;
+        }
+
         int recipe_index = select_recipe(completed_recipes, num_recipes, baker_id);
         printf("%sBaker %d: Working on recipe %s\033[0m\n", color, baker_id, recipes[recipe_index]);
 
@@ -227,9 +245,24 @@ void *baker(void *arg) {
 
         grab_ingredients(context, needed_ingredients, num_ingredients);
 
+        if (baker_id == ramsey_baker && !ramsied_triggered && rand() % 10 == 0) {
+            ramsied(baker_id, color);
+            ramsied_triggered = true;
+        }
+
         mix_ingredients(context);
 
+        if (baker_id == ramsey_baker && !ramsied_triggered && rand() % 10 == 0) {
+            ramsied(baker_id, color);
+            ramsied_triggered = true;
+        }
+
         bake_ingredients(context);
+
+        if (baker_id == ramsey_baker && !ramsied_triggered && rand() % 10 == 0) {
+            ramsied(baker_id, color);
+            ramsied_triggered = true;
+        }
 
         free(needed_ingredients);
 
@@ -270,6 +303,9 @@ int main() {
     semctl(semID, SPOON, SETVAL, NUM_SPOONS);
     semctl(semID, OVEN, SETVAL, NUM_OVENS);
 
+    // randomly selects a baker to be "Ramsied"
+    int ramsey_baker = rand() % num_bakers;
+
     // Create baker threads
     for (int i = 0; i < num_bakers; i++) {
         BakerContext *context = malloc(sizeof(BakerContext)); // Dynamically allocate memory for BakerContext
@@ -279,6 +315,7 @@ int main() {
         }
         context->baker_id = i + 1;
         context->color = colors[i % 10]; // Assign a unique color to each baker
+        context->ramsey_baker = ramsey_baker;
 
         // Create the thread
         if (pthread_create(&threads[i], NULL, baker, context) != 0) {
