@@ -8,7 +8,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-
 // resource indices used in the semaphore, chatgpt helped with this
 #define MIXER 0
 #define PANTRY 1
@@ -99,7 +98,6 @@ int select_recipe(int completed_recipes[], int num_recipes, int baker_id) {
         recipe_index = rand() % num_recipes; // Randomly select a recipe
     } while (completed_recipes[recipe_index]); // Ensure the recipe hasn't been completed
 
-    completed_recipes[recipe_index] = 1; // Mark the recipe as completed
     return recipe_index;
 }
 
@@ -192,7 +190,7 @@ void bake_ingredients(BakerContext *context) {
 }
 
 void ramsied(int baker_id, const char *color) {
-    printf("%sBaker %d: Ramsied! Releasing all resources\033[0m\n", color, baker_id);
+    printf("%sBaker %d: Ramsied! Restarting recipe\033[0m\n", color, baker_id);
 
     release_resource(semID, MIXER, "Mixer", baker_id, color);
     release_resource(semID, PANTRY, "Pantry", baker_id, color);
@@ -215,11 +213,6 @@ void *baker(void *arg) {
     bool ramsied_triggered = false; // ensures baker is only "Ramsied" once
 
     while (1) {
-        if (baker_id == ramsey_baker && !ramsied_triggered && rand() % 10 == 0) {
-            ramsied(baker_id, color);
-            ramsied_triggered = true;
-        }
-
         int recipe_index = select_recipe(completed_recipes, num_recipes, baker_id);
         printf("%sBaker %d: Working on recipe %s\033[0m\n", color, baker_id, recipes[recipe_index]);
 
@@ -238,30 +231,32 @@ void *baker(void *arg) {
             needed_ingredients[i] = recipe_ingredients[recipe_index][i];
         }
 
-        printf("%sBaker %d: Ingredients for recipe %s:\033[0m\n", color, baker_id, recipes[recipe_index]);
-        for (int i = 0; i < num_ingredients; i++) {
-            printf("%s  - %s\033[0m\n", color, needed_ingredients[i]);
-        }
+        while(1) {
+            printf("%sBaker %d: Ingredients for recipe %s:\033[0m\n", color, baker_id, recipes[recipe_index]);
+            for (int i = 0; i < num_ingredients; i++) {
+                printf("%s  - %s\033[0m\n", color, needed_ingredients[i]);
+            }
 
-        grab_ingredients(context, needed_ingredients, num_ingredients);
+            grab_ingredients(context, needed_ingredients, num_ingredients);
 
-        if (baker_id == ramsey_baker && !ramsied_triggered && rand() % 10 == 0) {
-            ramsied(baker_id, color);
-            ramsied_triggered = true;
-        }
+            if (baker_id == ramsey_baker && !ramsied_triggered && rand() % 10 == 0) {
+                ramsied(baker_id, color);
+                ramsied_triggered = true;
+                continue;
+            }
 
-        mix_ingredients(context);
+            mix_ingredients(context);
 
-        if (baker_id == ramsey_baker && !ramsied_triggered && rand() % 10 == 0) {
-            ramsied(baker_id, color);
-            ramsied_triggered = true;
-        }
+            if (baker_id == ramsey_baker && !ramsied_triggered && rand() % 10 == 0) {
+                ramsied(baker_id, color);
+                ramsied_triggered = true;
+                continue;
+            }
 
-        bake_ingredients(context);
+            bake_ingredients(context);
 
-        if (baker_id == ramsey_baker && !ramsied_triggered && rand() % 10 == 0) {
-            ramsied(baker_id, color);
-            ramsied_triggered = true;
+            completed_recipes[recipe_index] = 1; // Mark the recipe as completed
+            break;
         }
 
         free(needed_ingredients);
