@@ -189,15 +189,9 @@ void bake_ingredients(BakerContext *context) {
     printf("%sBaker %d: Finished baking!\033[0m\n", context->color, context->baker_id);
 }
 
-void ramsied(int baker_id, const char *color) {
-    printf("%sBaker %d: Ramsied! Restarting recipe\033[0m\n", color, baker_id);
-
-    release_resource(semID, MIXER, "Mixer", baker_id, color);
-    release_resource(semID, PANTRY, "Pantry", baker_id, color);
-    release_resource(semID, REFRIGERATOR, "Refrigerator", baker_id, color);
-    release_resource(semID, BOWL, "Bowl", baker_id, color);
-    release_resource(semID, SPOON, "Spoon", baker_id, color);
-    release_resource(semID, OVEN, "Oven", baker_id, color);
+void ramsied(int baker_id, const char *color, const char *recipes[], int recipe_index) {
+    printf("%sBaker %d is an idiot sandwich and GOT RAMSIED!\033[0m\n", color, baker_id);
+    printf("%sBaker %d is restarting recipe %s\033[0m\n", color, baker_id, recipes[recipe_index]);
 }
 
 void *baker(void *arg) {
@@ -242,7 +236,7 @@ void *baker(void *arg) {
             grab_ingredients(context, needed_ingredients, num_ingredients);
 
             if (baker_id == ramsey_baker && !ramsied_triggered && random_ramsey_num == total_iterations) {
-                ramsied(baker_id, color);
+                ramsied(baker_id, color, recipes, recipe_index);
                 ramsied_triggered = true;
                 continue;
             }
