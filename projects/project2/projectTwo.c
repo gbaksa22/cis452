@@ -176,7 +176,7 @@ void mix_ingredients(BakerContext *context) {
     printf("%sBaker %d: Released Bowl, Spoon, and Mixer\033[0m\n", context->color, context->baker_id);
 }
 
-void bake_ingredients(BakerContext *context) {
+void bake_ingredients(BakerContext *context, const char *current_recipe) {
     // Acquire the oven
     printf("%sBaker %d: Waiting for Oven\033[0m\n", context->color, context->baker_id);
     use_resource(semID, OVEN, "Oven", context->baker_id, context->color);
@@ -186,7 +186,7 @@ void bake_ingredients(BakerContext *context) {
 
     // Release the oven
     release_resource(semID, OVEN, "Oven", context->baker_id, context->color);
-    printf("%sBaker %d: Finished baking!\033[0m\n", context->color, context->baker_id);
+    printf("%sBaker %d: Finished baking %s!\033[0m\n", context->color, context->baker_id, current_recipe);
 }
 
 void ramsied(int baker_id, const char *color, const char *recipes[], int recipe_index) {
@@ -243,7 +243,7 @@ void *baker(void *arg) {
 
             mix_ingredients(context);
 
-            bake_ingredients(context);
+            bake_ingredients(context, recipes[recipe_index]);
 
             completed_recipes[recipe_index] = 1; // Mark the recipe as completed
             total_iterations++;
