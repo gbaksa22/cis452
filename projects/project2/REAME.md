@@ -72,6 +72,19 @@ Once the ingredients are mixed, the baker uses the oven to bake the recipe. The 
 
 ---
 
+### Ramsied 
+
+During a randomly selected baker loop, a randomly selected baker will be "Ramsied" once every time the program runs.
+
+1. **Selecting the Baker and Loop**
+   - In the `main` function, the `rand()` function is called twice. The first call randomly selects a baker from the available bakers, and the second call picks a loop iteration between 0 and 5, corresponding to the total number of recipes
+
+2. **Catching the Ramsied Baker**
+   - During each recipe loop, after the baker gathers their ingredients, an if statement checks if the current baker and loop iteration match the randomly selected ones. If they do, the Ramsied function is triggered.
+
+3. **Ramsied Logic**
+   - When a baker is "Ramsied", they must restart their recipe from the `grab_ingredients` function. This simulates losing all their ingredients and releasing any held semaphores, without affecting other recipes.
+
 ## Key Features
 
 - **Concurrency**:
