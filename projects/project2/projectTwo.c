@@ -29,13 +29,12 @@ struct sembuf v = { 0, +1, SEM_UNDO}; // signal
 
 int semID;
 
-// Define globally at the top of the file
 const char *recipe_ingredients[5][7] = {
-    {"Flour", "Sugar", "Milk", "Butter", NULL},               // Cookies
-    {"Flour", "Sugar", "Baking Soda", "Salt", "Egg", "Milk", NULL}, // Pancakes
-    {"Yeast", "Sugar", "Salt", NULL},                        // Pizza Dough
-    {"Flour", "Sugar", "Salt", "Yeast", "Baking Soda", "Egg", NULL}, // Soft Pretzels
-    {"Flour", "Sugar", "Salt", "Butter", "Egg", "Cinnamon", NULL}   // Cinnamon Rolls
+    {"Flour", "Sugar", "Milk", "Butter", NULL},                         // Cookies
+    {"Flour", "Sugar", "Baking Soda", "Salt", "Egg", "Milk", NULL},     // Pancakes
+    {"Yeast", "Sugar", "Salt", NULL},                                   // Pizza Dough
+    {"Flour", "Sugar", "Salt", "Yeast", "Baking Soda", "Egg", NULL},    // Soft Pretzels
+    {"Flour", "Sugar", "Salt", "Butter", "Egg", "Cinnamon", NULL}       // Cinnamon Rolls
 };
 
 const char *colors[] = {
@@ -52,21 +51,21 @@ typedef struct {
 } BakerContext;
 
 void use_resource(int semID, int resource_index, const char *resource_name, int baker_id, const char *color) {
-    p.sem_num = resource_index; // Set the semaphore index
+    p.sem_num = resource_index;
     if (semop(semID, &p, 1) < 0) {
         perror("semop wait failed");
         exit(1);
     }
-    printf("%sBaker %d: Acquired %s\033[0m\n", color, baker_id, resource_name); // Use the color
+    printf("%sBaker %d: Acquired %s\033[0m\n", color, baker_id, resource_name);
 }
 
 void release_resource(int semID, int resource_index, const char *resource_name, int baker_id, const char *color) {
-    v.sem_num = resource_index; // Set the semaphore index
+    v.sem_num = resource_index;
     if (semop(semID, &v, 1) < 0) {
         perror("semop signal failed");
         exit(1);
     }
-    printf("%sBaker %d: Released %s\033[0m\n", color, baker_id, resource_name); // Use the color
+    printf("%sBaker %d: Released %s\033[0m\n", color, baker_id, resource_name);
 }
 
 
@@ -75,10 +74,10 @@ int is_in_refrigerator(const char *ingredient) {
     const char *refrigerator_items[] = {"Egg", "Milk", "Butter"};
     for (int i = 0; i < 3; i++) {
         if (strcmp(ingredient, refrigerator_items[i]) == 0) {
-            return 1; // Found in refrigerator
+            return 1;
         }
     }
-    return 0; // Not in refrigerator
+    return 0;
 }
 
 // Helper function: Check if an ingredient is in the pantry
@@ -86,13 +85,13 @@ int is_in_pantry(const char *ingredient) {
     const char *pantry_items[] = {"Flour", "Sugar", "Yeast", "Baking Soda", "Salt", "Cinnamon"};
     for (int i = 0; i < 6; i++) {
         if (strcmp(ingredient, pantry_items[i]) == 0) {
-            return 1; // Found in pantry
+            return 1;
         }
     }
-    return 0; // Not in pantry
+    return 0;
 }
 
-int select_recipe(int completed_recipes[], int num_recipes, int baker_id) {
+int select_recipe(int completed_recipes[], int num_recipes, int baker_id) { // Got help from ChatGPT for random
     srand(time(NULL) + baker_id); // Seed random generator uniquely
     int recipe_index;
     do {
@@ -177,14 +176,11 @@ void mix_ingredients(BakerContext *context) {
 }
 
 void bake_ingredients(BakerContext *context, const char *current_recipe) {
-    // Acquire the oven
     printf("%sBaker %d: Waiting for Oven\033[0m\n", context->color, context->baker_id);
     use_resource(semID, OVEN, "Oven", context->baker_id, context->color);
 
-    // Simulate baking in the oven
     printf("%sBaker %d: Baking ingredients in the Oven\033[0m\n", context->color, context->baker_id);
 
-    // Release the oven
     release_resource(semID, OVEN, "Oven", context->baker_id, context->color);
     printf("%sBaker %d: Finished baking %s!\033[0m\n", context->color, context->baker_id, current_recipe);
 }
