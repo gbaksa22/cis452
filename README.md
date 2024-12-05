@@ -1,6 +1,6 @@
 # CIS 452: Operating Systems
 
-This repository contains lecture notes, assignments, and lab exercises completed as part of **CIS 371: Operating Systems**. The course provides an in-depth understanding of operating system design, architecture, and functionality, focusing on topics like process management, memory management, scheduling, and synchronization.
+This repository contains lecture notes, assignments, and lab exercises completed as part of **CIS 452: Operating Systems**. The course provides an in-depth understanding of operating system design, architecture, and functionality, focusing on topics like process management, memory management, scheduling, and synchronization.
 
 ---
 
